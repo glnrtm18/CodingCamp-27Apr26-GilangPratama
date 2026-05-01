@@ -1,0 +1,541 @@
+/* Expense & Budget Visualizer — styles.css */
+
+/* ============================================================
+   1. CSS Custom Properties (Design Tokens)
+   ============================================================ */
+:root {
+  /* Category colors (used for chart segments and badges) */
+  --color-food:      #FF6384; /* coral-red  */
+  --color-transport: #36A2EB; /* sky-blue   */
+  --color-fun:       #FFCE56; /* amber-yellow */
+
+  /* Surface / background */
+  --color-bg:        #ffffff;
+  --color-bg-subtle: #f5f5f5;
+  --color-bg-card:   #ffffff;
+
+  /* Text
+     --color-text on --color-bg  → contrast ≈ 18.1:1  (WCAG AA ✓)
+     --color-text-muted on --color-bg → contrast ≈ 7.0:1 (WCAG AA ✓) */
+  --color-text:       #1a1a1a;
+  --color-text-muted: #595959;
+
+  /* Borders */
+  --color-border:       #d1d5db;
+  --color-border-focus: #2563eb;
+
+  /* Focus ring (visible keyboard indicator) */
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.45);
+
+  /* Semantic / interactive */
+  --color-primary:       #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-error:         #dc2626;
+}
+
+/* ============================================================
+   2. Base / Reset Styles
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+}
+
+/* Inherit font settings for form controls (browser resets) */
+input,
+select,
+button,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Remove default list styling */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Smooth focus transitions */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ============================================================
+   3. Page Layout — CSS Grid (Responsive)
+   ============================================================ */
+
+/*
+ * Outer page wrapper: balance header + main grid stacked vertically.
+ * Using a column-based body layout so the balance display and main
+ * grid share the same horizontal constraints.
+ */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+/* ── Balance Display (header) ─────────────────────────────── */
+.balance-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+/* ── Main App Grid ────────────────────────────────────────── */
+/*
+ * Mobile-first: single column, sections stack vertically.
+ * Each section gets a card-like appearance.
+ */
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* ── Grid sections (shared card style) ───────────────────── */
+.form-section,
+.list-section,
+.chart-section {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  min-width: 0; /* prevent grid blowout */
+}
+
+/* ── Tablet / Desktop breakpoint (≥ 768px) ───────────────── */
+/*
+ * Two-column layout:
+ *   Column 1: form-section (top-left) + chart-section (bottom-left)
+ *   Column 2: list-section (spans both rows, full height)
+ *
+ * This ensures all four primary components (Balance_Display,
+ * Input_Form, Transaction_List, Chart) are visible without
+ * scrolling on viewports ≥ 768px.
+ */
+@media (min-width: 768px) {
+  body {
+    padding: 1.5rem;
+    /* Constrain max width and center on very wide screens */
+    max-width: 1200px;
+    margin-inline: auto;
+    width: 100%;
+    /* Reset flex so body fills the viewport width correctly */
+    align-self: stretch;
+  }
+
+  .app-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    /* Limit total height so everything fits without scrolling */
+    max-height: calc(100vh - 10rem); /* account for header + padding */
+  }
+
+  .form-section {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .list-section {
+    grid-column: 2;
+    grid-row: 1 / 3; /* span both rows */
+    overflow-y: auto; /* list itself scrolls if needed */
+  }
+
+  .chart-section {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* ── Wide desktop (≥ 1200px) ─────────────────────────────── */
+@media (min-width: 1200px) {
+  body {
+    padding: 2rem;
+    max-width: 1440px;
+  }
+
+  .app-grid {
+    max-height: calc(100vh - 12rem);
+  }
+}
+
+/* ── Very wide screens (≥ 1920px) ────────────────────────── */
+@media (min-width: 1920px) {
+  body {
+    max-width: 1600px;
+    padding: 2.5rem;
+  }
+}
+
+/* ============================================================
+   4. Internal Component Layout — Flexbox
+   ============================================================ */
+
+/* ── Balance Display internals ───────────────────────────── */
+.balance-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.balance-total {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* ── Form section internals ──────────────────────────────── */
+.form-section h2,
+.list-section h2,
+.chart-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#expenseForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ── List section internals ──────────────────────────────── */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Chart section internals ─────────────────────────────── */
+.chart-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ============================================================
+   5. Form Inputs, Select, and Submit Button
+   ============================================================ */
+
+/* Labels */
+.form-field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* Text / number inputs and select */
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Restore select arrow */
+.form-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23595959' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+}
+
+/* Hover state */
+.form-field input:hover,
+.form-field select:hover {
+  border-color: var(--color-border-focus);
+}
+
+/* Focus state — visible ring (Req 7.5) */
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+/* Inline field error */
+.field-error {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+  min-height: 1.25em; /* reserve space so layout doesn't jump */
+}
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  margin-top: 0.25rem;
+}
+
+.btn-submit:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Focus ring on submit button (Req 7.5) */
+.btn-submit:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn-submit:active {
+  background-color: var(--color-primary-hover);
+  opacity: 0.9;
+}
+
+/* ============================================================
+   6. Transaction List Items
+   ============================================================ */
+
+/* Individual transaction row */
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+}
+
+/* Item name — grows to fill available space */
+.transaction-name {
+  flex: 1 1 auto;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Amount */
+.transaction-amount {
+  flex: 0 0 auto;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* ── Category Badges ──────────────────────────────────────── */
+/* Base badge style */
+.transaction-badge {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Per-category colors using CSS custom property tokens (Req 7.2) */
+.badge-food,
+[data-category="Food"] .transaction-badge,
+.transaction-badge[data-category="Food"] {
+  background-color: var(--color-food);
+}
+
+.badge-transport,
+[data-category="Transport"] .transaction-badge,
+.transaction-badge[data-category="Transport"] {
+  background-color: var(--color-transport);
+}
+
+.badge-fun,
+[data-category="Fun"] .transaction-badge,
+.transaction-badge[data-category="Fun"] {
+  background-color: var(--color-fun);
+  /* amber-yellow needs dark text for contrast */
+  color: #1a1a1a;
+}
+
+/* ── Delete Button ────────────────────────────────────────── */
+.btn-delete {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-delete:hover {
+  color: var(--color-error);
+  background-color: #fee2e2; /* light red tint */
+  border-color: var(--color-error);
+}
+
+/* Visible focus ring on delete button (Req 7.5) */
+.btn-delete:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  color: var(--color-error);
+}
+
+/* ============================================================
+   7. Empty-State Placeholders
+   ============================================================ */
+
+/* Transaction list empty state */
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  font-style: italic;
+}
+
+/* Chart container empty state */
+.chart-empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  font-style: italic;
+}
+
+/* ============================================================
+   8. Chart Container — Canvas Sizing and Responsive Breakpoints
+      Requirements: 7.3, 7.4
+   ============================================================ */
+
+/*
+ * Canvas sizing — mobile-first baseline (320px and up).
+ *
+ * Chart.js reads the canvas's CSS dimensions to determine the
+ * drawing buffer size, so we control the chart size purely via CSS.
+ * `max-width` caps the canvas on narrow viewports; `width: 100%`
+ * lets it shrink below that cap on very small screens (≥ 320px).
+ * `aspect-ratio: 1 / 1` keeps the pie chart square at all sizes
+ * without needing an explicit height.
+ */
+#expenseChart {
+  display: block;          /* remove inline-block gap */
+  width: 100%;
+  max-width: 300px;        /* sensible cap on narrow/mobile viewports */
+  aspect-ratio: 1 / 1;    /* maintain square aspect ratio for pie chart */
+  height: auto;            /* let aspect-ratio drive the height */
+}
+
+/* ── 320px — minimum supported viewport ─────────────────── */
+/*
+ * At the minimum supported width the chart container should not
+ * overflow. Ensure the canvas never exceeds the container width
+ * and the chart-section padding doesn't cause horizontal scroll.
+ */
+@media (max-width: 320px) {
+  .chart-section {
+    padding: 0.75rem;
+  }
+
+  #expenseChart {
+    max-width: 100%;       /* fill the (very narrow) container */
+  }
+}
+
+/* ── 768px — tablet / two-column layout ─────────────────── */
+/*
+ * In the two-column grid the chart-section occupies the bottom-left
+ * cell. Give the canvas a slightly larger cap so it uses the
+ * available space better without overflowing the card.
+ */
+@media (min-width: 768px) {
+  #expenseChart {
+    max-width: 260px;      /* fits comfortably in the left column card */
+  }
+}
+
+/* ── 1920px — very wide screens ─────────────────────────── */
+/*
+ * On very wide displays the left column is wider, so we can allow
+ * a larger canvas while still keeping the pie chart from becoming
+ * disproportionately large relative to the surrounding UI.
+ */
+@media (min-width: 1920px) {
+  #expenseChart {
+    max-width: 340px;
+  }
+}
