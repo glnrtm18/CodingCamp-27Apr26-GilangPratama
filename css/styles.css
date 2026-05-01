@@ -268,7 +268,7 @@ body {
   align-items: center;
   justify-content: center;
   flex: 1;
-  min-height: 0;
+  min-height: 320px;       /* ensure the container is tall enough to show the chart */
 }
 
 /* ============================================================
@@ -495,7 +495,7 @@ body {
 #expenseChart {
   display: block;          /* remove inline-block gap */
   width: 100%;
-  max-width: 300px;        /* sensible cap on narrow/mobile viewports */
+  max-width: 420px;        /* larger baseline for better readability */
   aspect-ratio: 1 / 1;    /* maintain square aspect ratio for pie chart */
   height: auto;            /* let aspect-ratio drive the height */
 }
@@ -524,7 +524,7 @@ body {
  */
 @media (min-width: 768px) {
   #expenseChart {
-    max-width: 260px;      /* fits comfortably in the left column card */
+    max-width: 380px;      /* larger chart in the two-column left cell */
   }
 }
 
@@ -536,7 +536,7 @@ body {
  */
 @media (min-width: 1920px) {
   #expenseChart {
-    max-width: 340px;
+    max-width: 460px;      /* generous size on very wide displays */
   }
 }
 
