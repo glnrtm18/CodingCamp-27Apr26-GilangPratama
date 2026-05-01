@@ -150,7 +150,7 @@ Implement a single-page, client-side expense tracker using plain HTML, CSS, and 
     - Toggle visibility of the `<canvas>` and the chart empty-state placeholder element
     - _Requirements: 4.5_
 
-- [ ] 10. Implement EventHandlers and application bootstrap
+- [x] 10. Implement EventHandlers and application bootstrap
   - [x] 10.1 Implement `EventHandlers.onFormSubmit(event)`
     - Call `event.preventDefault()`
     - Read name, amount, category from the form
@@ -161,13 +161,13 @@ Implement a single-page, client-side expense tracker using plain HTML, CSS, and 
     - Call `State.add(tx)`, `StorageManager.save(State.getAll())`, `Renderer.renderList(State.getAll())`, `Renderer.renderBalance(State.getTotal())`, `ChartManager.update(State.getTotalByCategory())`, `Renderer.resetForm()`
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 3.2, 4.2, 5.1_
 
-  - [ ] 10.2 Implement `EventHandlers.onDeleteClick(event)` with event delegation
+  - [x] 10.2 Implement `EventHandlers.onDeleteClick(event)` with event delegation
     - Attach a single `click` listener to the Transaction_List container
     - Check if the clicked element (or its closest ancestor) is a delete button with a `data-id` attribute
     - Call `State.remove(id)`, `StorageManager.save(State.getAll())`, `Renderer.renderList(State.getAll())`, `Renderer.renderBalance(State.getTotal())`, `ChartManager.update(State.getTotalByCategory())`
     - _Requirements: 2.4, 3.3, 4.3, 5.2_
 
-  - [ ] 10.3 Implement application bootstrap (`init` function)
+  - [x] 10.3 Implement application bootstrap (`init` function)
     - Load transactions from `StorageManager.load()` into `transactions`
     - Call `ChartManager.init(document.getElementById('expenseChart'))`
     - Call `Renderer.renderList(State.getAll())`, `Renderer.renderBalance(State.getTotal())`, `ChartManager.update(State.getTotalByCategory())`
@@ -176,7 +176,7 @@ Implement a single-page, client-side expense tracker using plain HTML, CSS, and 
     - Call `init()` at the bottom of the IIFE
     - _Requirements: 2.2, 5.3, 5.4, 6.5_
 
-- [ ] 11. Final checkpoint — full integration
+- [x] 11. Final checkpoint — full integration
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

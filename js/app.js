@@ -494,6 +494,36 @@
   };
 
   /* ── Bootstrap ──────────────────────────────────────────────────────────── */
-  // TODO: implement init() and call it here (Task 10)
+
+  /**
+   * Initialises the application: loads persisted transactions, renders all UI
+   * components, and attaches event listeners.
+   */
+  function init() {
+    // Restore persisted transactions into the in-memory state array
+    transactions = StorageManager.load();
+
+    // Initialise the Chart.js pie chart on the canvas element
+    ChartManager.init(document.getElementById('expenseChart'));
+
+    // Render the initial UI state from the loaded transactions
+    Renderer.renderList(State.getAll());
+    Renderer.renderBalance(State.getTotal());
+    ChartManager.update(State.getTotalByCategory());
+
+    // Attach form submit handler
+    var form = document.getElementById('expenseForm');
+    if (form) {
+      form.addEventListener('submit', EventHandlers.onFormSubmit);
+    }
+
+    // Attach delete click handler (event delegation on the list container)
+    var list = document.getElementById('transactionList');
+    if (list) {
+      list.addEventListener('click', EventHandlers.onDeleteClick);
+    }
+  }
+
+  init();
 
 })();
