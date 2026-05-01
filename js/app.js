@@ -18,10 +18,20 @@
     Fun:       '#FFCE56',
   };
 
+  /* ── Storage keys ──────────────────────────────────────────────────────── */
+  const THEME_KEY        = 'ebv_theme';
+  const LIMIT_KEY        = 'ebv_limit';
+
   /* ── In-memory state ────────────────────────────────────────────────────── */
 
   /** Master transaction array — single source of truth for the session. */
   let transactions = [];
+
+  /** Current spending limit (0 = no limit set). */
+  let spendingLimit = 0;
+
+  /** Current sort mode: null | 'amount' | 'category' */
+  let sortMode = null;
 
   /* ── StorageManager ─────────────────────────────────────────────────────── */
 
@@ -134,6 +144,26 @@
     },
   };
 
+  /* ── Sort helper ────────────────────────────────────────────────────────── */
+
+  /**
+   * Returns the transaction list sorted according to the current sortMode.
+   * - 'amount'   → highest to lowest
+   * - 'category' → alphabetical (A–Z)
+   * - null       → insertion order (no sort)
+   *
+   * @returns {Transaction[]}
+   */
+  function getSorted() {
+    var list = State.getAll();
+    if (sortMode === 'amount') {
+      list.sort(function (a, b) { return b.amount - a.amount; });
+    } else if (sortMode === 'category') {
+      list.sort(function (a, b) { return a.category.localeCompare(b.category); });
+    }
+    return list;
+  }
+
   /* ── Validator ──────────────────────────────────────────────────────────── */
 
   const Validator = {
@@ -183,6 +213,8 @@
       if (el) {
         el.textContent = '$' + total.toFixed(2);
       }
+      // Check spending limit whenever balance updates
+      LimitManager.check(total);
     },
 
     /**
@@ -464,7 +496,7 @@
       // Update state, persist, and refresh all UI components
       State.add(tx);
       StorageManager.save(State.getAll());
-      Renderer.renderList(State.getAll());
+      Renderer.renderList(getSorted());
       Renderer.renderBalance(State.getTotal());
       ChartManager.update(State.getTotalByCategory());
       Renderer.resetForm();
@@ -487,9 +519,100 @@
 
       State.remove(id);
       StorageManager.save(State.getAll());
-      Renderer.renderList(State.getAll());
+      Renderer.renderList(getSorted());
       Renderer.renderBalance(State.getTotal());
       ChartManager.update(State.getTotalByCategory());
+    },
+  };
+
+  /* ── ThemeManager ───────────────────────────────────────────────────────── */
+
+  const ThemeManager = {
+    /**
+     * Applies the given theme ('light' or 'dark') to the document and
+     * updates the toggle button label.
+     * @param {'light'|'dark'} theme
+     */
+    apply(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var btn = document.getElementById('themeToggle');
+      if (btn) {
+        if (theme === 'dark') {
+          btn.textContent = '☀️ Light Mode';
+          btn.setAttribute('aria-label', 'Switch to light mode');
+        } else {
+          btn.textContent = '🌙 Dark Mode';
+          btn.setAttribute('aria-label', 'Switch to dark mode');
+        }
+      }
+      try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
+    },
+
+    /** Loads the saved theme preference (defaults to 'light'). */
+    load() {
+      var saved = null;
+      try { saved = localStorage.getItem(THEME_KEY); } catch (_) {}
+      return saved === 'dark' ? 'dark' : 'light';
+    },
+
+    /** Toggles between light and dark. */
+    toggle() {
+      var current = document.documentElement.getAttribute('data-theme') || 'light';
+      this.apply(current === 'dark' ? 'light' : 'dark');
+    },
+  };
+
+  /* ── LimitManager ───────────────────────────────────────────────────────── */
+
+  const LimitManager = {
+    /**
+     * Saves the limit value and updates the hint text.
+     * @param {number} limit  0 means "no limit"
+     */
+    set(limit) {
+      spendingLimit = limit;
+      try { localStorage.setItem(LIMIT_KEY, String(limit)); } catch (_) {}
+      var hint = document.getElementById('limitHint');
+      if (hint) {
+        hint.textContent = limit > 0
+          ? 'Limit set: $' + limit.toFixed(2)
+          : 'No limit set.';
+      }
+    },
+
+    /** Loads the saved limit (defaults to 0). */
+    load() {
+      var raw = null;
+      try { raw = localStorage.getItem(LIMIT_KEY); } catch (_) {}
+      var parsed = parseFloat(raw);
+      return (isFinite(parsed) && parsed >= 0) ? parsed : 0;
+    },
+
+    /**
+     * Checks the total against the current limit and shows/hides the warning.
+     * Also toggles the .over-limit class on the balance total element.
+     * @param {number} total
+     */
+    check(total) {
+      var warning = document.getElementById('limitWarning');
+      var balanceEl = document.getElementById('balanceTotal');
+      var exceeded = spendingLimit > 0 && total > spendingLimit;
+      if (warning) {
+        if (exceeded) {
+          warning.removeAttribute('hidden');
+          warning.textContent = '\u26A0\uFE0F Spending limit exceeded! ($' +
+            spendingLimit.toFixed(2) + ' limit)';
+        } else {
+          warning.setAttribute('hidden', '');
+        }
+      }
+      if (balanceEl) {
+        if (exceeded) {
+          balanceEl.classList.add('over-limit');
+        } else {
+          balanceEl.classList.remove('over-limit');
+        }
+      }
     },
   };
 
@@ -503,11 +626,27 @@
     // Restore persisted transactions into the in-memory state array
     transactions = StorageManager.load();
 
+    // Restore theme preference
+    ThemeManager.apply(ThemeManager.load());
+
+    // Restore spending limit
+    spendingLimit = LimitManager.load();
+    var limitInput = document.getElementById('spendingLimit');
+    if (limitInput && spendingLimit > 0) {
+      limitInput.value = spendingLimit;
+    }
+    var hint = document.getElementById('limitHint');
+    if (hint) {
+      hint.textContent = spendingLimit > 0
+        ? 'Limit set: $' + spendingLimit.toFixed(2)
+        : 'No limit set.';
+    }
+
     // Initialise the Chart.js pie chart on the canvas element
     ChartManager.init(document.getElementById('expenseChart'));
 
     // Render the initial UI state from the loaded transactions
-    Renderer.renderList(State.getAll());
+    Renderer.renderList(getSorted());
     Renderer.renderBalance(State.getTotal());
     ChartManager.update(State.getTotalByCategory());
 
@@ -522,6 +661,44 @@
     if (list) {
       list.addEventListener('click', EventHandlers.onDeleteClick);
     }
+
+    // ── Feature: Dark/Light toggle ──────────────────────────
+    var themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function () {
+        ThemeManager.toggle();
+      });
+    }
+
+    // ── Feature: Spending limit ─────────────────────────────
+    var setLimitBtn = document.getElementById('setLimitBtn');
+    if (setLimitBtn) {
+      setLimitBtn.addEventListener('click', function () {
+        var val = parseFloat(document.getElementById('spendingLimit').value);
+        var limit = (isFinite(val) && val > 0) ? val : 0;
+        LimitManager.set(limit);
+        LimitManager.check(State.getTotal());
+      });
+    }
+
+    // ── Feature: Sort buttons ───────────────────────────────
+    var sortBtns = document.querySelectorAll('.btn-sort');
+    sortBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mode = btn.getAttribute('data-sort');
+        if (sortMode === mode) {
+          // Clicking the active sort again resets to insertion order
+          sortMode = null;
+        } else {
+          sortMode = mode;
+        }
+        // Update active state on buttons
+        sortBtns.forEach(function (b) {
+          b.classList.toggle('active', b.getAttribute('data-sort') === sortMode);
+        });
+        Renderer.renderList(getSorted());
+      });
+    });
   }
 
   init();

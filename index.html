@@ -7,10 +7,21 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
+    <!-- Dark/Light Mode Toggle -->
+    <div class="theme-toggle-bar">
+      <button type="button" id="themeToggle" class="btn-theme-toggle" aria-label="Switch to dark mode">
+        🌙 Dark Mode
+      </button>
+    </div>
+
     <!-- Balance Display -->
     <header class="balance-display">
       <h1 class="balance-label">Total Spent</h1>
       <p class="balance-total" id="balanceTotal">$0.00</p>
+      <!-- Spending limit warning -->
+      <p class="limit-warning" id="limitWarning" role="alert" aria-live="polite" hidden>
+        ⚠️ Spending limit exceeded!
+      </p>
     </header>
 
     <main class="app-grid">
@@ -71,11 +82,41 @@
 
           <button type="submit" class="btn-submit">Add Expense</button>
         </form>
+
+        <!-- Spending Limit -->
+        <div class="limit-section">
+          <label for="spendingLimit" class="limit-label">Spending Limit ($)</label>
+          <div class="limit-input-row">
+            <input
+              type="number"
+              id="spendingLimit"
+              name="spendingLimit"
+              placeholder="e.g. 500"
+              min="0"
+              step="0.01"
+              class="limit-input"
+            />
+            <button type="button" id="setLimitBtn" class="btn-set-limit">Set</button>
+          </div>
+          <p class="limit-hint" id="limitHint"></p>
+        </div>
       </section>
 
       <!-- Transaction List -->
       <section class="list-section" aria-labelledby="listHeading">
         <h2 id="listHeading">Transactions</h2>
+
+        <!-- Sort Controls -->
+        <div class="sort-controls" role="group" aria-label="Sort transactions">
+          <span class="sort-label">Sort by:</span>
+          <button type="button" id="sortAmount" class="btn-sort" data-sort="amount">
+            Amount ↕
+          </button>
+          <button type="button" id="sortCategory" class="btn-sort" data-sort="category">
+            Category ↕
+          </button>
+        </div>
+
         <ul id="transactionList" class="transaction-list" aria-label="Transaction list">
           <li class="empty-state" id="listEmptyState">No expenses recorded yet.</li>
         </ul>

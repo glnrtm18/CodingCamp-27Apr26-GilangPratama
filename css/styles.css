@@ -539,3 +539,210 @@ body {
     max-width: 340px;
   }
 }
+
+/* ============================================================
+   9. Dark Theme
+   ============================================================ */
+
+/*
+ * Dark theme overrides all color custom properties on :root.
+ * Applied via the `data-theme="dark"` attribute on <html>.
+ * All components automatically pick up the new values because
+ * they reference the custom properties throughout.
+ */
+[data-theme="dark"] {
+  --color-bg:           #0f172a;
+  --color-bg-subtle:    #1e293b;
+  --color-bg-card:      #1e293b;
+  --color-text:         #f1f5f9;
+  --color-text-muted:   #94a3b8;
+  --color-border:       #334155;
+  --color-border-focus: #60a5fa;
+  --focus-ring:         0 0 0 3px rgba(96, 165, 250, 0.45);
+  --color-primary:       #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-error:         #f87171;
+}
+
+/* Dark theme: restore select arrow with light fill */
+[data-theme="dark"] .form-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+}
+
+/* Dark theme: delete button hover tint */
+[data-theme="dark"] .btn-delete:hover {
+  background-color: rgba(248, 113, 113, 0.15);
+}
+
+/* ── Theme Toggle Bar ─────────────────────────────────────── */
+.theme-toggle-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.btn-theme-toggle {
+  padding: 0.375rem 0.875rem;
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-theme-toggle:hover {
+  border-color: var(--color-border-focus);
+}
+
+.btn-theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ============================================================
+   10. Spending Limit
+   ============================================================ */
+
+.limit-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.limit-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.limit-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.limit-input {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.375rem;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.limit-input:hover {
+  border-color: var(--color-border-focus);
+}
+
+.limit-input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.btn-set-limit {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.875rem;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-set-limit:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-set-limit:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.limit-hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  min-height: 1.25em;
+}
+
+/* ── Limit Warning in Balance Display ────────────────────── */
+.limit-warning {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--color-error);
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+/* Balance total turns red when limit is exceeded */
+.balance-total.over-limit {
+  color: var(--color-error);
+}
+
+/* ============================================================
+   11. Sort Controls
+   ============================================================ */
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.btn-sort {
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-sort:hover {
+  border-color: var(--color-border-focus);
+}
+
+.btn-sort:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Active sort button — highlighted to show current sort */
+.btn-sort.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.btn-sort.active:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
